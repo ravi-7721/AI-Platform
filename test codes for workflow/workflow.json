@@ -1,0 +1,205 @@
+{
+  "name": "Untitled Workflow",
+  "nodes": [
+    {
+      "name": "introduction",
+      "type": "conversation",
+      "isStart": true,
+      "metadata": {
+        "position": {
+          "x": -365.75269729644384,
+          "y": -176.2629031109464
+        }
+      },
+      "prompt": "You are a voice assistant helping with creating new AI interviewers. Your task is to collect data from the user. Remember that this is a voice conversation - do not use any special characters.",
+      "variableExtractionPlan": {
+        "output": [
+          {
+            "title": "role",
+            "description": "what role would you like to train for?",
+            "type": "string",
+            "enum": []
+          },
+          {
+            "title": "type",
+            "description": "Are you aiming for a technical, behavioral or mixed interview?",
+            "type": "string",
+            "enum": []
+          },
+          {
+            "title": "level",
+            "description": "The job experience required",
+            "type": "string",
+            "enum": ["entry", "mid", "senior"]
+          },
+          {
+            "title": "techstack",
+            "description": "A list of technologies to cover during the job interview.",
+            "type": "string",
+            "enum": []
+          },
+          {
+            "title": "amount",
+            "description": "How many questions would you like me to prepare for you?",
+            "type": "number",
+            "enum": []
+          },
+          {
+            "title": "userid",
+            "description": "",
+            "type": "string",
+            "enum": []
+          }
+        ]
+      },
+      "messagePlan": {
+        "firstMessage": "Hello, {{username}}! Let's prepare your interview.\r\nI'll ask you a few questions and generate a perfect interview just for you. Are you Ready?"
+      },
+      "toolIds": []
+    },
+    {
+      "name": "apiRequest_1772554294918",
+      "type": "tool",
+      "metadata": {
+        "position": {
+          "x": -386.071190987262,
+          "y": 460.23982175580943
+        }
+      },
+      "tool": {
+        "type": "apiRequest",
+        "function": {
+          "name": "api_request_tool",
+          "description": "API request tool",
+          "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          }
+        },
+
+        "messages": [
+          {
+            "type": "request-start",
+            "blocking": false
+          }
+        ],
+        "name": "getUserData",
+        "url": "https://ai-platform-silk-one.vercel.app/api/vapi/generate",
+        "method": "POST",
+        "encryptedPaths": null,
+        "headers": {
+          "type": "object",
+          "properties": {
+            "userid": {
+              "type": "string",
+              "value": "{{userid}}"
+            }
+          }
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string",
+              "description": "",
+              "default": "{{role}}"
+            },
+            "type": {
+              "type": "string",
+              "description": "",
+              "default": "{{type}}"
+            },
+            "level": {
+              "type": "string",
+              "description": "",
+              "default": "{{level}}"
+            },
+            "techstack": {
+              "type": "string",
+              "description": "",
+              "default": "{{techstack}}"
+            },
+            "amount": {
+              "type": "number",
+              "description": "",
+              "default": "{{amount}}"
+            },
+            "userid": {
+              "type": "string",
+              "description": "",
+              "default": "{{userid}}"
+            }
+          },
+          "required": [
+            "role",
+            "type",
+            "level",
+            "techstack",
+            "amount",
+            "userid"
+          ],
+          "additionalProperties": false
+        },
+        "variableExtractionPlan": {
+          "schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "aliases": []
+        }
+      }
+    },
+    {
+      "name": "hangup_1772554593753",
+      "type": "tool",
+      "metadata": {
+        "position": {
+          "x": -386.90337724001034,
+          "y": 695.1436435339671
+        }
+      },
+      "tool": {
+        "type": "endCall",
+        "function": {
+          "name": "untitled_tool",
+          "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          }
+        },
+
+        "messages": [
+          {
+            "type": "request-start",
+            "content": "Everything has been generated . I'll redirect you to the dashboard now ,thanks for the call",
+            "blocking": true
+          }
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "introduction",
+      "to": "apiRequest_1772554294918",
+      "condition": {
+        "type": "ai",
+        "prompt": "if the user provided all the data to be extracted"
+      }
+    },
+    {
+      "from": "apiRequest_1772554294918",
+      "to": "hangup_1772554593753",
+      "condition": {
+        "type": "ai",
+        "prompt": ""
+      }
+    }
+  ],
+  "model": null,
+  "voice": null,
+  "globalPrompt": ""
+}
