@@ -1,39 +1,50 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  try {
-    const { variableValues } = await req.json();
+  const { variableValues } = await req.json();
 
-    const workflowId = process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID;
-    if (!workflowId) {
-      return NextResponse.json(
-        { message: "Missing NEXT_PUBLIC_VAPI_WORKFLOW_ID" },
-        { status: 500 }
-      );
-    }
-    console.log("Has VAPI_PRIVATE_KEY:", !!process.env.VAPI_PRIVATE_KEY);
-    console.log("Private key length:", process.env.VAPI_PRIVATE_KEY?.length);
+  const privateKey = process.env.VAPI_PRIVATE_KEY;
+  const workflowId = process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID;
 
-    const resp = await fetch("https://api.vapi.ai/call/web", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.VAPI_PRIVATE_KEY!}`,
-      },
-      body: JSON.stringify({
-        workflowId,
-        workflowOverrides: {
-          variableValues: variableValues ?? {},
-        },
-      }),
-    });
-
-    const data = await resp.json();
-    return NextResponse.json(data, { status: resp.status });
-  } catch (err: any) {
+  if (!privateKey) {
     return NextResponse.json(
-      { message: err?.message ?? "Unknown error" },
+      { message: "Missing VAPI_PRIVATE_KEY env var on server" },
       { status: 500 }
     );
   }
+
+  if (!workflowId) {
+    return NextResponse.json(
+      { message: "Missing NEXT_PUBLIC_VAPI_WORKFLOW_ID env var on server" },
+      { status: 500 }
+    );
+  }
+
+  // quick sanity: Vapi keys are UUIDs (length 36)
+  if (privateKey.length !== 36) {
+    return NextResponse.json(
+      {
+        message: `VAPI_PRIVATE_KEY looks wrong length (${privateKey.length}). It should be a UUID.`,
+      },
+      { status: 500 }
+    );
+  }
+
+  const resp = await fetch("https://api.vapi.ai/call/web", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${privateKey}`,
+    },
+    body: JSON.stringify({
+      workflowId,
+      workflowOverrides: { variableValues: variableValues ?? {} },
+    }),
+  });
+
+  const data = await resp.json();
+  return NextResponse.json(
+    { vapiStatus: resp.status, vapiBody: data },
+    { status: 200 }
+  );
 }
