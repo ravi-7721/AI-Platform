@@ -11,6 +11,8 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+    console.log("Has VAPI_PRIVATE_KEY:", !!process.env.VAPI_PRIVATE_KEY);
+    console.log("Private key length:", process.env.VAPI_PRIVATE_KEY?.length);
 
     const resp = await fetch("https://api.vapi.ai/call/web", {
       method: "POST",
