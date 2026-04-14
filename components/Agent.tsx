@@ -20,13 +20,6 @@ interface SavedMessage {
   role: "user" | "system" | "assistant";
   content: string;
 }
-//newly manual addding line no 24 to 28
-import { VapiClient } from "@vapi-ai/server-sdk";
-
-const vapiClient = new VapiClient({
-  token: "process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN!",
-});
-
 const Agent = ({
   userName,
   userId,
@@ -122,30 +115,42 @@ const Agent = ({
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
+
     try {
       if (type === "generate") {
-        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-          variableValues: {
-            username: userName,
-            userid: userId,
-          },
-          clientMessages: [],
-          serverMessages: [],
+        // 1) ask your server to create a web call using the workflow
+        const res = await fetch("/api/vapi/workflow-web-call", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            variableValues: {
+              username: userName,
+              userid: userId,
+            },
+          }),
         });
+
+        const webCall = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            webCall?.message ?? "Failed to create workflow web call"
+          );
+        }
+
+        // 2) start the call in the browser using the returned payload
+        await vapi.start(webCall);
       } else {
         let formattedQuestions = "";
         if (questions) {
-          formattedQuestions = questions
-            .map((question) => `- ${question}`)
-            .join("\n");
+          formattedQuestions = questions.map((q) => `- ${q}`).join("\n");
         }
 
+        // This assumes `interviewer` is an assistant id
         await vapi.start(interviewer, {
           variableValues: {
             questions: formattedQuestions,
           },
-          clientMessages: [],
-          serverMessages: [],
         });
       }
     } catch (error) {
