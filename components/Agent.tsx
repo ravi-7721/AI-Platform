@@ -20,6 +20,12 @@ interface SavedMessage {
   role: "user" | "system" | "assistant";
   content: string;
 }
+//newly manual addding line no 24 to 28
+import { VapiClient } from "@vapi-ai/server-sdk";
+
+const vapiClient = new VapiClient({
+  token: "process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN!",
+});
 
 const Agent = ({
   userName,
