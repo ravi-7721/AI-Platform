@@ -137,7 +137,7 @@ const Agent = ({
             webCall?.message ?? "Failed to create workflow web call"
           );
         }
-
+        console.log("webCall returned from server:", webCall);
         // 2) start the call in the browser using the returned payload
         await vapi.start(webCall);
       } else {
