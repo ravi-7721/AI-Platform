@@ -1,19 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const privateKey = process.env.VAPI_PRIVATE_KEY;
-
-  return NextResponse.json(
-    {
-      hasPrivateKey: !!privateKey,
-      privateKeyLength: privateKey?.length,
-      privateKeyLast4: privateKey?.slice(-4),
-      workflowIdLast4: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID?.slice(-4),
-    },
-    { status: 200 }
-  );
   try {
-    
     const { variableValues } = await req.json();
 
     const privateKey = process.env.VAPI_PRIVATE_KEY;
@@ -45,26 +33,8 @@ export async function POST(req: Request) {
       }),
     });
 
-    const text = await resp.text();
-    let data: any;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { raw: text };
-    }
-
-    if (!resp.ok) {
-      return NextResponse.json(
-        {
-          error: "Vapi call/web failed",
-          vapiStatus: resp.status,
-          vapiResponse: data,
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(data, { status: 200 });
+    const data = await resp.json();
+    return NextResponse.json(data, { status: resp.status });
   } catch (err: any) {
     return NextResponse.json(
       { error: "Route crashed", message: err?.message, stack: err?.stack },
@@ -72,4 +42,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
