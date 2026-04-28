@@ -1,7 +1,19 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
+  const privateKey = process.env.VAPI_PRIVATE_KEY;
+
+  return NextResponse.json(
+    {
+      hasPrivateKey: !!privateKey,
+      privateKeyLength: privateKey?.length,
+      privateKeyLast4: privateKey?.slice(-4),
+      workflowIdLast4: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID?.slice(-4),
+    },
+    { status: 200 }
+  );
   try {
+    
     const { variableValues } = await req.json();
 
     const privateKey = process.env.VAPI_PRIVATE_KEY;
@@ -60,3 +72,4 @@ export async function POST(req: Request) {
     );
   }
 }
+
