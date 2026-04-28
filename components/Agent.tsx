@@ -118,7 +118,7 @@ const Agent = ({
 
     try {
       if (type === "generate") {
-        // 1) ask your server to create a web call using the workflow
+       /*  // 1) ask your server to create a web call using the workflow
         const res = await fetch("/api/vapi/workflow-web-call", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -139,7 +139,13 @@ const Agent = ({
         }
         console.log("webCall returned from server:", webCall);
         // 2) start the call in the browser using the returned payload
-        await vapi.start(webCall);
+        await vapi.start(webCall); */
+        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+          variableValues: {
+            username: userName,
+            userid: userId,
+          },
+        });
       } else {
         let formattedQuestions = "";
         if (questions) {
